@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="IpDao">
+	<sql id="whereIp">
+		<if test="IP_USER != null and IP_USER != '' ">
+			AND IP_USER LIKE CONCAT('%', #{IP_USER}, '%')  
+		</if>
+		<if test="IP_ACTIVEYN != null and IP_ACTIVEYN != '' ">
+			AND IP_ACTIVEYN =  #{IP_ACTIVEYN}
+		</if>
+		<if test="IP_DELYN != null and IP_DELYN != '' ">
+			AND IP_DELYN =  #{IP_DELYN}
+		</if>
+		<if test="IP_NO != null and IP_NO != '' ">
+			AND IP_NO =  #{IP_NO}
+		</if>
+	</sql>
+
+	<select id="selectIpListCnt"  resultType="int"  parameterType="hashmap">
+		SELECT IFNULL(COUNT(*), 0) AS CNT
+		 FROM (
+ 				SELECT
+						ST.*
+					FROM (
+							 SELECT		
+									@RNUM := @RNUM + 1 AS RNUM,
+									VI.IP_NO,
+									VI.IP_ADDR1,
+									VI.IP_ADDR2,
+									VI.IP_ADDR3,
+									VI.IP_ADDR4,
+									VI.IP_USER,
+									VI.IP_MEMO,
+									VI.IP_ACTIVEYN,
+									VI.IP_DELYN,
+									VI.ISRT_ID,
+									VI.ISRT_DTM,
+									VI.UPDT_ID,
+									VI.UPDT_DTM
+							  FROM VR_IP VI, (SELECT @RNUM := 0) R
+							 WHERE 1=1
+							 <include refid="whereIp" />
+						 ) ST
+				  WHERE 1=1	
+ 			 ) TOT
+	  WHERE 1=1  
+	</select>
+	
+	<select id="selectIpList" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		SELECT 
+						IFNULL(ST.RNUM, 0) AS RNUM,
+				        IFNULL(ST.IP_NO, '') AS IP_NO,
+				        IFNULL(ST.IP_ADDR1, '') AS IP_ADDR1,
+				        IFNULL(ST.IP_ADDR2, '') AS IP_ADDR2,
+				        IFNULL(ST.IP_ADDR3, '') AS IP_ADDR3,
+				        IFNULL(ST.IP_ADDR4, '') AS IP_ADDR4,
+				        IFNULL(ST.IP_USER, '') AS IP_USER,
+				        IFNULL(ST.IP_MEMO, '') AS IP_MEMO,
+				        IFNULL(ST.IP_ACTIVEYN, '') AS IP_ACTIVEYN,
+				        IFNULL(ST.IP_DELYN, '') AS IP_DELYN,
+				        IFNULL(ST.ISRT_ID, '') AS ISRT_ID,
+				        IFNULL(ST.ISRT_DTM, '') AS ISRT_DTM,
+				        IFNULL(ST.UPDT_ID, '') AS UPDT_ID,
+				        IFNULL(ST.UPDT_DTM, '') AS UPDT_DTM
+		  FROM ( 			
+							 SELECT		
+									@RNUM := @RNUM + 1 AS RNUM,
+									VI.IP_NO,
+									VI.IP_ADDR1,
+									VI.IP_ADDR2,
+									VI.IP_ADDR3,
+									VI.IP_ADDR4,
+									VI.IP_USER,
+									VI.IP_MEMO,
+									VI.IP_ACTIVEYN,
+									VI.IP_DELYN,
+									VI.ISRT_ID,
+									VI.ISRT_DTM,
+									VI.UPDT_ID,
+									VI.UPDT_DTM
+							  FROM VR_IP VI, (SELECT @RNUM := 0) R
+							 WHERE 1=1
+							 <include refid="whereIp" />
+							
+			) ST
+	  WHERE 1=1
+	  LIMIT ${startPage}, ${endPage} 
+  </select>
+  
+  <select id="selectCheckIpList" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		SELECT 
+						IFNULL(ST.RNUM, 0) AS RNUM,
+				        IFNULL(ST.IP_NO, '') AS IP_NO,
+				        IFNULL(ST.IP_ADDR1, '') AS IP_ADDR1,
+				        IFNULL(ST.IP_ADDR2, '') AS IP_ADDR2,
+				        IFNULL(ST.IP_ADDR3, '') AS IP_ADDR3,
+				        IFNULL(ST.IP_ADDR4, '') AS IP_ADDR4,
+				        IFNULL(ST.IP_USER, '') AS IP_USER,
+				        IFNULL(ST.IP_MEMO, '') AS IP_MEMO,
+				        IFNULL(ST.IP_ACTIVEYN, '') AS IP_ACTIVEYN,
+				        IFNULL(ST.IP_DELYN, '') AS IP_DELYN,
+				        IFNULL(ST.ISRT_ID, '') AS ISRT_ID,
+				        IFNULL(ST.ISRT_DTM, '') AS ISRT_DTM,
+				        IFNULL(ST.UPDT_ID, '') AS UPDT_ID,
+				        IFNULL(ST.UPDT_DTM, '') AS UPDT_DTM
+		  FROM ( 			
+							 SELECT		
+									@RNUM := @RNUM + 1 AS RNUM,
+									VI.IP_NO,
+									VI.IP_ADDR1,
+									VI.IP_ADDR2,
+									VI.IP_ADDR3,
+									VI.IP_ADDR4,
+									VI.IP_USER,
+									VI.IP_MEMO,
+									VI.IP_ACTIVEYN,
+									VI.IP_DELYN,
+									VI.ISRT_ID,
+									VI.ISRT_DTM,
+									VI.UPDT_ID,
+									VI.UPDT_DTM
+							  FROM VR_IP VI, (SELECT @RNUM := 0) R
+							 WHERE 1=1
+							 <include refid="whereIp" />
+			) ST
+	  WHERE 1=1
+  </select>
+  
+  
+  
+  
+  <insert id="IpInsert" parameterType="java.util.HashMap" >
+	INSERT INTO VR_IP	(
+		IP_ADDR1,
+		IP_ADDR2,
+		IP_ADDR3,
+		IP_ADDR4,
+		IP_USER,
+		IP_MEMO,
+		ISRT_ID,
+		ISRT_DTM,
+		UPDT_ID,
+		UPDT_DTM
+	) VALUES (
+		#{IP_ADDR1},
+		#{IP_ADDR2},
+		#{IP_ADDR3},
+		#{IP_ADDR4},
+		#{IP_USER},
+		#{IP_MEMO},
+		#{ISRT_ID},
+		NOW(),
+		#{ISRT_ID},
+		NOW()
+	)
+  </insert>
+  
+  <update id="IpUpdate" parameterType="HashMap">
+  	UPDATE VR_IP
+	   SET
+			<if test="IP_ADDR1    	!= null and IP_ADDR1    != '' ">	IP_ADDR1 = #{IP_ADDR1},</if>    	
+			<if test="IP_ADDR2    	!= null and IP_ADDR2    != '' ">	IP_ADDR2 = #{IP_ADDR2},</if>    
+			<if test="IP_ADDR3    	!= null and IP_ADDR3    != '' ">	IP_ADDR3 = #{IP_ADDR3},</if>    
+			<if test="IP_ADDR4    	!= null and IP_ADDR4    != '' ">	IP_ADDR4 = #{IP_ADDR4},</if>    
+			<if test="IP_USER     	!= null and IP_USER  	!= '' ">	IP_USER = #{IP_USER},</if>    
+			<if test="IP_ACTIVEYN 	!= null and IP_ACTIVEYN != '' ">	IP_ACTIVEYN = #{IP_ACTIVEYN},</if>    
+			<if test="IP_DELYN    	!= null and IP_DELYN    != '' ">	IP_DELYN = #{IP_DELYN},</if>   
+			<if test="IP_MEMO     	!= null and IP_MEMO    	!= '' ">	IP_MEMO = #{IP_MEMO},</if>    
+			UPDT_ID = #{ISRT_ID},
+			UPDT_DTM = NOW()
+	WHERE 1=1
+  		<if test="IP_NO != null and IP_NO != '' ">
+			  AND IP_NO =  #{IP_NO}
+		</if>
+  </update>
+  
+  
+  
+  
+  
+  
+  
+  
+</mapper>

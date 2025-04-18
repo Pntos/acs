@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+<mapper namespace="TaskSchedulerDao">
+  <select id="selectWmsIfNoCnt"  resultType="int"  parameterType="hashmap">
+	  	SELECT 
+				IFNULL(COUNT(*), 0) AS CNT
+	     FROM VR_ORDER_WMS
+	   WHERE 1=1   
+	  <if test="INTERFACE_ID != null and INTERFACE_ID != '' ">
+	  	AND INTERFACE_ID  = #{INTERFACE_ID} 
+	  </if>
+  </select>
+  
+  <insert id="wmsInsert" parameterType="java.util.HashMap" >
+		INSERT INTO VR_ORDER_WMS	(	
+			VO_STATE,
+			INTERFACE_ID,
+			ORDER_TYPE,
+			ORDER_NO,
+			ALF_PACK_NO,
+			START_DATE,
+			END_DATE,
+			REMOVE_YN,
+			SEND_YN,
+			ISRT_ID,
+			ISRT_DTM,
+			UPDT_ID,
+			UPDT_DTM
+		) VALUES (
+			#{VO_STATE}, 
+			#{INTERFACE_ID}, 
+			#{ORDER_TYPE}, 
+			#{ORDER_NO}, 
+			#{ALF_PACK_NO}, 
+			#{START_DATE}, 
+			#{END_DATE},
+			#{REMOVE_YN},
+			#{SEND_YN},
+			#{ISRT_ID},
+			#{ISRT_DTM},
+			#{UPDT_ID},
+			#{UPDT_DTM}
+		)
+  </insert>
+  
+  <update id="wmsUpdate" parameterType="HashMap">
+	  	UPDATE VR_ORDER_WMS
+		   SET
+				<if test="VO_STATE      != null and VO_STATE    != '' ">VO_STATE = #{VO_STATE},</if>    	
+				<if test="ORDER_TYPE    != null and ORDER_TYPE  != '' ">ORDER_TYPE = #{ORDER_TYPE},</if>    
+				<if test="ORDER_NO      != null and ORDER_NO    != '' ">ORDER_NO = #{ORDER_NO},</if>    
+				<if test="ALF_PACK_NO   != null and ALF_PACK_NO != '' ">ALF_PACK_NO = #{ALF_PACK_NO},</if>    
+				<if test="START_DATE    != null and START_DATE  != '' ">START_DATE = #{START_DATE},</if>    
+				<if test="END_DATE      != null and END_DATE    != '' ">END_DATE = #{END_DATE},</if>   
+				<if test="REMOVE_YN     != null and REMOVE_YN   != '' ">REMOVE_YN = #{REMOVE_YN},</if>    
+				<if test="SEND_YN       != null and SEND_YN     != '' ">SEND_YN = #{SEND_YN},</if> 
+				UPDT_ID = #{ISRT_ID},
+				UPDT_DTM = NOW()
+		WHERE 1=1
+	  		<if test="INTERFACE_ID != null and INTERFACE_ID != '' ">
+				  AND INTERFACE_ID =  #{INTERFACE_ID}
+			</if>
+  </update>
+  
+  <insert id="wmsLogInsert" parameterType="java.util.HashMap" >
+		INSERT INTO VR_SCHEDULE_LOG	(	
+			VS_STATE,
+			VS_AT_TIME,
+			VS_CNT,
+			VS_TYPE,
+			ERR_MSG
+		) VALUES (
+			#{VS_STATE}, 
+			NOW(),
+			#{VS_CNT}, 
+			#{VS_TYPE},
+			#{ERR_MSG}
+		)
+  </insert>
+  
+  <insert id="orgFileInsert" parameterType="java.util.HashMap" >
+		INSERT INTO VR_ORGFILE	(	
+			VO_FILEPATH,
+			VO_FILENAME,
+			VO_WMS_NO,
+			VO_CAMERA,
+			VO_STARTTIME,
+			VO_ENDTIME,
+			VO_DIFFTIME,
+			ISRT_DTM
+		) VALUES (
+			#{VO_FILEPATH}, 
+			#{VO_FILENAME}, 
+			#{VO_WMS_NO}, 
+			#{VO_CAMERA}, 
+			#{VO_STARTTIME},
+			#{VO_ENDTIME},
+			#{VO_DIFFTIME},
+			NOW()
+		)
+  </insert>
+  
+  <select id="selectOrgFileInfo" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+	SELECT
+			VO_NO, 
+			VO_FILEPATH, 
+			VO_FILENAME, 
+			VO_WMS_NO, 
+			VO_CAMERA, 
+			VO_STARTTIME,
+			VO_ENDTIME, 
+			VO_DIFFTIME, 
+			ISRT_DTM
+	FROM VR_ORGFILE
+	WHERE 1=1
+		 <if test="VO_WMS_NO != null and VO_WMS_NO != '' ">
+	  	AND VO_WMS_NO = #{VO_WMS_NO} 
+	  </if>
+  </select>
+  
+  <insert id="wmvFileInsert" parameterType="java.util.HashMap" >
+		INSERT INTO VR_WMVFILE	(	
+			VW_FILEPATH,
+			VW_FILENAME,
+			VW_ORDERNO,
+			VW_STARTTIME,
+			VW_ENDTIME,
+			VW_DIFFTIME,
+			ISRT_DTM
+		) VALUES (
+			#{VW_FILEPATH}, 
+			#{VW_FILENAME}, 
+			#{VW_ORDERNO}, 
+			#{VW_STARTTIME},
+			#{VW_ENDTIME},
+			#{VW_DIFFTIME},
+			NOW()
+		)
+  </insert>
+  
+  <select id="selectFileInfo" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+ <!-- 
+  		SELECT
+			   	VW_NO,
+				VW_FILEPATH,
+				VW_FILENAME,
+				VW_ORDERNO,
+				VW_STARTTIME,
+				VW_ENDTIME,
+				VW_DIFFTIME,
+				ISRT_DTM	
+		  FROM VR_WMVFILE
+		 WHERE 1=1
+		 <if test="VW_NO != null and VW_NO != '' ">
+	  	AND VW_NO = #{VW_NO} 
+	  </if>
+  -->
+   	SELECT
+    	   	VO_NO,
+			VO_FILEPATH,
+			VO_FILENAME,
+			VO_WMS_NO,
+			VO_CAMERA,
+			VO_STARTTIME,
+			VO_ENDTIME,
+			ISRT_DTM	
+	  FROM VR_ORGFILE
+ 	 WHERE 1=1
+     <if test="VO_NO != null and VO_NO != '' ">
+	   AND VO_NO = #{VO_NO} 
+	 </if>	  
+  </select>
+  
+  <select id="selectFileOrderList" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+SELECT 
+						
+						IFNULL(ST.VO_WMS_NO, '') AS VO_WMS_NO,
+						IFNULL(ST.CM_USER, '') AS CM_USER,
+				        IFNULL(ST.CM_ID, '') AS CM_ID,
+				        IFNULL(ST.INTERFACE_ID, '') AS INTERFACE_ID,
+				        IFNULL(ST.START_DATE, '') AS START_DATE,
+				        IFNULL(ST.START_TIME, '') AS START_TIME,
+				        IFNULL(ST.END_DATE, '') AS END_DATE,
+				        IFNULL(ST.END_TIME, '') AS END_TIME,
+				        IFNULL(ST.ORG_START_DATE, '') AS ORG_START_DATE,
+				        IFNULL(ST.ORG_END_DATE, '') AS ORG_END_DATE,
+				        IFNULL(ST.ISRT_ID, '') AS ISRT_ID,
+				        IFNULL(ST.FILE_YN, '') AS FILE_YN
+		  FROM ( 			
+							 SELECT		
+									@RNUM := @RNUM + 1 AS RNUM,
+									VC.CM_USER,
+									VC.CM_ID, 
+									VW.VO_WMS_NO,
+									VW.INTERFACE_ID,
+									VW.ORDER_NO,
+									DATE_FORMAT( VW.START_DATE, '%Y-%m-%d') AS START_DATE,
+									DATE_FORMAT( VW.START_DATE, '%H%i%s') AS START_TIME,
+									DATE_FORMAT( VW.END_DATE, '%Y-%m-%d') AS END_DATE,
+									DATE_FORMAT( VW.END_DATE, '%H%i%s') AS END_TIME,
+									DATE_FORMAT( VW.START_DATE, '%Y-%m-%d %H:%i:%s') AS ORG_START_DATE,
+									DATE_FORMAT( VW.END_DATE, '%Y-%m-%d %H:%i:%s') AS ORG_END_DATE,
+									VW.ISRT_ID,
+									VW.ISRT_DTM,
+									VW.FILE_YN
+							  FROM VR_ORDER_WMS VW
+				   LEFT OUTER JOIN VR_CAMERA VC ON VW.ISRT_ID = VC.CM_USER, (SELECT @RNUM := 0) R 	
+						WHERE 1=1
+						  AND VW.FILE_YN = 'N'
+						  AND TRIM(VC.CM_USER) <![CDATA[<>]]> ''
+			) ST
+	  WHERE 1=1
+   ORDER BY ST.VO_WMS_NO DESC
+   LIMIT 3
+  </select>
+  
+
+		
+  
+  
+  
+</mapper>

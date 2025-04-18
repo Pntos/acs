@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE tiles-definitions PUBLIC
+       "-//Apache Software Foundation//DTD Tiles Configuration 3.0//EN"
+       "http://tiles.apache.org/dtds/tiles-config_3_0.dtd">
+
+
+<tiles-definitions>
+	<definition name="login-tiles" template="/WEB-INF/tiles/login-tiles.jsp">
+		<put-attribute name="common" value="/WEB-INF/tiles/common.jsp" /> 
+		<put-attribute name="content" value="" />
+	</definition>
+	
+	<definition name="single-tiles" template="/WEB-INF/tiles/single-tiles.jsp">
+		<put-attribute name="content" value="" />
+	</definition>
+	
+	<definition name="content-tiles" template="/WEB-INF/tiles/content-tiles.jsp">
+		<put-attribute name="common"    value="/WEB-INF/tiles/common.jsp" /> 
+		<put-attribute name="header" value="/WEB-INF/tiles/header.jsp" />
+		<put-attribute name="content" value="" />
+		<put-attribute name="footer"  value="/WEB-INF/tiles/footer.jsp" />  
+	</definition>
+	
+	<!-- 웹화면 -->
+	<definition name="index" extends="login-tiles">
+		<put-attribute name="content" value="/WEB-INF/views/index.jsp" />
+	</definition> 
+	
+	<definition name="error" extends="single-tiles">
+		<put-attribute name="content" value="/WEB-INF/views/common/{1}.jsp" />
+	</definition> 
+	
+	<definition name="web/*/*.tiles" extends="content-tiles">
+		<put-attribute name="content"   value="/WEB-INF/views/web/{1}/{2}.jsp" />
+	</definition>
+
+	<definition name="mobile/*/*.tiles" extends="single-tiles">
+		<put-attribute name="content" value="/WEB-INF/views/mobile/{1}/{2}.jsp" />
+	</definition> 
+		
+</tiles-definitions>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="WmsDataDao">
+	<sql id="whereHermes">
+		<if test="INTERFACE_ID != null and INTERFACE_ID != '' ">
+			AND INTERFACE_ID =  #{INTERFACE_ID}
+		</if>
+		<if test="ORDER_TYPE != null and ORDER_TYPE != '' ">
+			AND ORDER_TYPE =  #{ORDER_TYPE}
+		</if>
+		<if test="SEND_YN != null and SEND_YN != '' ">
+			AND SEND_YN =  #{SEND_YN}
+		</if>
+	</sql>
+	
+	<select id="selectHermesTimeCheckList" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		SELECT
+			    INTERFACE_ID,
+			    ORDER_TYPE,
+			    ORDER_NO,
+				ALF_PACK_NO,
+			    TO_CHAR(START_DATE, 'YYYY-MM-DD HH24:MI:SS') AS START_DATE,
+			    TO_CHAR(END_DATE, 'YYYY-MM-DD HH24:MI:SS') AS END_DATE,
+			    REMOVE_YN,
+			    SEND_YN,
+			    ADDWHO,
+			    TO_CHAR(ADDDATE, 'YYYY-MM-DD HH24:MI:SS') AS ADDDATE,
+				EDITWHO,
+				TO_CHAR(EDITDATE, 'YYYY-MM-DD HH24:MI:SS') AS EDITDATE
+		  FROM HERMES_VIDEO_TIMECHECK
+	     <!-- WHERE TO_CHAR(START_DATE, 'YYYY-MM-DD') > '2023-08-23' -->
+	     WHERE START_DATE <![CDATA[ >= ]]> '2024-10-01' AND START_DATE <![CDATA[ <= ]]> TO_CHAR(SYSDATE, 'YYYY-MM-DD')	
+	     <include refid="whereHermes" />
+	</select>
+	
+	
+</mapper>

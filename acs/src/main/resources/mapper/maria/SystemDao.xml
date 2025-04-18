@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="SystemDao">
+	<sql id="whereSystem">
+		<if test="SYSTEM_NO != null and SYSTEM_NO != '' ">
+			AND SYSTEM_NO =  #{SYSTEM_NO}
+		</if>
+	</sql>
+	
+	<select id="selectSystemCnt"  resultType="int"  parameterType="hashmap">
+		SELECT 
+			   IFNULL(COUNT(*), 0) AS CNT
+	      FROM VR_SYSTEM
+	     WHERE 1=1   
+	</select>
+	
+	<select id="selectSystemInfo" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		SELECT 
+			    SYSTEM_NO,
+			    WMS_URL,
+				WMS_ID,
+				WMS_PW,
+				WMS_PORT,
+				API_URL,
+				API_ID,
+				API_PW,
+				API_PORT,
+				SYS_PATH,
+				SYS_STIME,
+				SYS_ETIME,
+				SYS_PTIME,
+				SYS_VTIME,
+				ISRT_ID,
+				ISRT_DTM,
+				UPDT_ID,
+				UPDT_DTM
+	      FROM VR_SYSTEM
+	     WHERE 1=1   	
+	</select>
+	
+	<insert id="systemInsert" parameterType="java.util.HashMap" >
+		INSERT INTO VR_SYSTEM (
+			WMS_URL,
+			WMS_ID,
+			WMS_PW,
+			WMS_PORT,
+			API_URL,
+			API_ID,
+			API_PW,
+			API_PORT,
+			SYS_PATH,
+			SYS_STIME,
+			SYS_ETIME,
+			SYS_PTIME,
+			SYS_VTIME,
+			ISRT_ID,
+			ISRT_DTM,
+			UPDT_ID,
+			UPDT_DTM
+		) VALUES (
+			#{WMS_URL},
+			#{WMS_ID},
+			#{WMS_PW},
+			#{WMS_PORT},
+			#{API_URL},
+			#{API_ID},
+			#{API_PW},
+			#{API_PORT},
+			#{SYS_PATH},
+			#{SYS_STIME},
+			#{SYS_ETIME},
+			#{SYS_PTIME},
+			#{SYS_VTIME},
+			#{ISRT_ID},
+			NOW(),
+			#{ISRT_ID},
+			NOW()
+		)
+	</insert>
+	
+	<update id="systemUpdate" parameterType="HashMap">
+	  	UPDATE VR_SYSTEM
+		   SET
+				<if test="WMS_URL     != null and WMS_URL   != '' ">WMS_URL = #{WMS_URL},</if>    	
+				<if test="WMS_ID      != null and WMS_ID   	!= '' ">WMS_ID = #{WMS_ID},</if>    
+				<if test="WMS_PW      != null and WMS_PW   	!= '' ">WMS_PW = #{WMS_PW},</if>    
+				<if test="WMS_PORT    != null and WMS_PORT  != '' ">WMS_PORT = #{WMS_PORT},</if>
+				<if test="API_URL     != null and WMS_URL   != '' ">API_URL = #{API_URL},</if>    	
+				<if test="API_ID      != null and API_ID   	!= '' ">API_ID = #{API_ID},</if>    
+				<if test="API_PW      != null and API_PW   	!= '' ">API_PW = #{API_PW},</if>    
+				<if test="API_PORT    != null and API_PORT  != '' ">API_PORT = #{API_PORT},</if>
+				<if test="SYS_PATH    != null and SYS_PATH  != '' ">SYS_PATH = #{SYS_PATH},</if>    
+				<if test="SYS_STIME   != null and SYS_STIME != '' ">SYS_STIME = #{SYS_STIME},</if>   
+				<if test="SYS_ETIME   != null and SYS_ETIME != '' ">SYS_ETIME = #{SYS_ETIME},</if>    
+				<if test="SYS_PTIME   != null and SYS_PTIME != '' ">SYS_PTIME = #{SYS_PTIME},</if>    
+				<if test="SYS_VTIME   != null and SYS_VTIME != '' ">SYS_VTIME = #{SYS_VTIME},</if>    
+				UPDT_ID = #{ISRT_ID},
+				UPDT_DTM = NOW()
+		 WHERE 1=1
+		<if test="SYSTEM_NO != null and SYSTEM_NO != '' ">
+		   AND SYSTEM_NO =  #{SYSTEM_NO}
+		</if>
+  </update>
+
+</mapper>

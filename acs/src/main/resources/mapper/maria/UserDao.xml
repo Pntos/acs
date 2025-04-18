@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+<mapper namespace="UserDao">
+	<sql id="whereUser">
+		<if test="USER_ID != null and USER_ID != '' ">
+			AND USER_ID LIKE CONCAT('%', #{USER_ID}, '%')  
+		</if>
+		<if test="USER_NM != null and USER_NM != '' ">
+			AND USER_NM LIKE CONCAT('%', #{USER_NM}, '%')  
+		</if>
+		<if test="USER_GB != null and USER_GB != '' ">
+			AND USER_GB =  #{USER_GB}
+		</if>
+		<if test="DEL_YN != null and DEL_YN != '' ">
+			AND DEL_YN =  #{DEL_YN}
+		</if>
+		<if test="USER_NO != null and USER_NO != '' ">
+			AND USER_NO =  #{USER_NO}
+		</if>
+	</sql>
+	
+	<select id="getUser" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+			SELECT 
+					USER_NO,
+					USER_ID,
+					USER_NM,
+					USER_PW,
+					USER_GB,
+					CASE WHEN USER_GB = 'M' THEN '마스터' ELSE '게스트' END USER_GNM,
+					USER_ORG,
+					USE_YN,
+					USER_MEMO,
+					ISRT_ID,
+					ISRT_DTM,
+					UPDT_ID,
+					UPDT_DTM
+		     FROM VR_USER
+		   WHERE 1=1    
+		     <if test="USER_ID != null and USER_ID != '' ">
+			  	AND USER_ID  = #{USER_ID} 
+			 </if>
+			 <if test="USER_NO != null and USER_NO != '' ">
+				AND USER_NO =  #{USER_NO}
+			 </if>
+	</select>
+	
+	<select id="selectUserListCnt"  resultType="int"  parameterType="hashmap">
+		SELECT IFNULL(COUNT(*), 0) AS CNT
+		 FROM (
+ 				SELECT
+						ST.*
+					FROM (
+							 SELECT		
+									@RNUM := @RNUM + 1 AS RNUM,
+									VU.USER_NO,
+									VU.USER_ID,
+									VU.USER_NM,
+									VU.USER_PW,
+									VU.USER_GB,
+									VU.USER_ORG,
+									VU.USE_YN,
+									VU.DEL_YN,
+									VU.USER_MEMO,
+									VU.ISRT_ID,
+									VU.ISRT_DTM,
+									VU.UPDT_ID,
+									VU.UPDT_DTM
+							  FROM VR_USER VU, (SELECT @RNUM := 0) R
+							 WHERE 1=1
+							 <include refid="whereUser" />
+						 ) ST
+				  WHERE 1=1	
+ 			 ) TOT
+	  WHERE 1=1  
+	</select>
+	
+	<select id="selectUserList" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		SELECT 
+						IFNULL(ST.RNUM, 0) AS RNUM,
+				        IFNULL(ST.USER_NO, '') AS USER_NO,
+				        IFNULL(ST.USER_ID, '') AS USER_ID,
+				        IFNULL(ST.USER_NM, '') AS USER_NM,
+				        IFNULL(ST.USER_PW, '') AS USER_PW,
+				        IFNULL(ST.USER_GB, '') AS USER_GB,
+				        IFNULL(ST.USER_GNM, '') AS USER_GNM,
+				        IFNULL(ST.USER_ORG, '') AS USER_ORG,
+				        IFNULL(ST.USE_YN, '') AS USE_YN,
+				        IFNULL(ST.DEL_YN, '') AS DEL_YN,
+				        IFNULL(ST.USER_MEMO, '') AS USER_MEMO,
+				        IFNULL(ST.ISRT_ID, '') AS ISRT_ID,
+				        IFNULL(ST.ISRT_DTM, '') AS ISRT_DTM,
+				        IFNULL(ST.UPDT_ID, '') AS UPDT_ID,
+				        IFNULL(ST.UPDT_DTM, '') AS UPDT_DTM
+		  FROM ( 			
+							 SELECT		
+									@RNUM := @RNUM + 1 AS RNUM,
+									VU.USER_NO,
+									VU.USER_ID,
+									VU.USER_NM,
+									VU.USER_PW,
+									VU.USER_GB,
+									CASE WHEN VU.USER_GB = 'M' THEN '마스터' ELSE '게스트' END USER_GNM,
+									VU.USER_ORG,
+									VU.USE_YN,
+									VU.DEL_YN,
+									VU.USER_MEMO,
+									VU.ISRT_ID,
+									VU.ISRT_DTM,
+									VU.UPDT_ID,
+									VU.UPDT_DTM
+							  FROM VR_USER VU, (SELECT @RNUM := 0) R
+							 WHERE 1=1
+							 <include refid="whereUser" />
+							
+			) ST
+	  WHERE 1=1
+	  LIMIT ${startPage}, ${endPage} 
+  </select>
+  
+  <select id="selectUserId"  resultType="int"  parameterType="hashmap">
+  	SELECT 
+			IFNULL(COUNT(*), 0) AS CNT
+     FROM VR_USER
+   WHERE 1=1   
+  <if test="USER_ID != null and USER_ID != '' ">
+  	AND USER_ID  = #{USER_ID} 
+  </if>
+  </select>
+  
+  <insert id="userInsert" parameterType="java.util.HashMap" >
+	INSERT INTO VR_USER	(
+		USER_ID, 
+		USER_NM, 
+		USER_PW, 
+		USER_GB, 
+		USER_ORG, 
+		USE_YN, 
+		USER_MEMO,
+		ISRT_ID, 
+		ISRT_DTM, 
+		UPDT_ID, 
+		UPDT_DTM
+	) VALUES (
+		#{USER_ID}, 
+		#{USER_NM}, 
+		#{USER_PW}, 
+		#{USER_GB}, 
+		#{USER_ORG}, 
+		#{USE_YN}, 
+		#{USER_MEMO},
+		#{ISRT_ID},
+		NOW(),
+		#{ISRT_ID},
+		NOW()
+	)
+  </insert>
+  
+  <update id="userUpdate" parameterType="HashMap">
+  	UPDATE VR_USER
+	   SET
+			<if test="USER_NM      != null and USER_NM   != '' ">	USER_NM = #{USER_NM},</if>    	
+			<if test="USER_PW      != null and USER_PW   != '' ">	USER_PW = #{USER_PW},</if>    
+			<if test="USER_GB      != null and USER_GB   != '' ">	USER_GB = #{USER_GB},</if>    
+			<if test="USER_ORG     != null and USER_ORG  != '' ">	USER_ORG = #{USER_ORG},</if>    
+			<if test="USE_YN       != null and USE_YN    != '' ">	USE_YN = #{USE_YN},</if>    
+			<if test="DEL_YN       != null and DEL_YN    != '' ">	DEL_YN = #{DEL_YN},</if>   
+			<if test="USER_MEMO    != null and USER_MEMO != '' ">	USER_MEMO = #{USER_MEMO},</if>    
+			UPDT_ID = #{ISRT_ID},
+			UPDT_DTM = NOW()
+	WHERE 1=1
+  		<if test="USER_NO != null and USER_NO != '' ">
+			  AND USER_NO =  #{USER_NO}
+		</if>
+  </update>
+  
+
+</mapper>

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="LogDao">
+	<sql id="whereLog">
+		<if test="LOG_NO != null and LOG_NO != '' ">
+			AND LOG_NO =  #{LOG_NO}
+		</if>
+		<if test="LOG_GB != null and LOG_GB != '' ">
+			AND LOG_GB =  #{LOG_GB}
+		</if>
+		<if test="LOG_MEMO != null and LOG_MEMO != '' ">
+			AND LOG_MEMO LIKE CONCAT('%', #{LOG_MEMO}, '%')  
+		</if>
+	</sql>
+	
+	<select id="selectLogListCnt"  resultType="int"  parameterType="hashmap">
+		SELECT IFNULL(COUNT(*), 0) AS CNT
+		 FROM (
+ 				SELECT
+						ST.*
+					FROM (
+							 SELECT		
+									@RNUM := @RNUM + 1 AS RNUM,
+									VL.LOG_NO,
+									VL.LOG_GB,
+									VL.LOG_MEMO,
+									VL.ISRT_ID,
+									VL.ISRT_DTM,
+									VL.UPDT_ID,
+									VL.UPDT_DTM
+							  FROM VR_LOG VL, (SELECT @RNUM := 0) R
+							 WHERE 1=1
+							 <include refid="whereLog" />
+						 ) ST
+				  WHERE 1=1	
+ 			 ) TOT
+	  WHERE 1=1  
+	</select>
+	
+	<select id="selectLogList" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		SELECT 
+						IFNULL(ST.RNUM, 0) AS RNUM,
+				        IFNULL(ST.LOG_NO, '') AS LOG_NO,
+				        IFNULL(ST.LOG_GB, '') AS LOG_GB,
+				        IFNULL(ST.LOG_MEMO, '') AS LOG_MEMO,
+				        IFNULL(ST.ISRT_ID, '') AS ISRT_ID,
+				        IFNULL(ST.ISRT_DTM, '') AS ISRT_DTM,
+				        IFNULL(ST.UPDT_ID, '') AS UPDT_ID,
+				        IFNULL(ST.UPDT_DTM, '') AS UPDT_DTM
+		  FROM ( 			
+							 SELECT		
+									@RNUM := @RNUM + 1 AS RNUM,
+									VL.LOG_NO,
+									VL.LOG_GB,
+									VL.LOG_MEMO,
+									VL.ISRT_ID,
+									VL.ISRT_DTM,
+									VL.UPDT_ID,
+									VL.UPDT_DTM
+							  FROM VR_LOG VL, (SELECT @RNUM := 0) R
+							 WHERE 1=1
+							 <include refid="whereLog" />
+							
+			) ST
+	  WHERE 1=1
+	  ORDER BY ST.ISRT_DTM DESC
+	  LIMIT ${startPage}, ${endPage} 
+  </select>
+  
+  <insert id="logInsert" parameterType="java.util.HashMap" >
+	INSERT INTO VR_LOG (
+		LOG_GB, 
+		LOG_MEMO, 
+		ISRT_ID, 
+		ISRT_DTM, 
+		UPDT_ID,
+		UPDT_DTM
+	) VALUES (
+		#{LOG_GB}, 
+		#{LOG_MEMO}, 
+		#{ISRT_ID},
+		NOW(),
+		#{ISRT_ID},
+		NOW()
+	)
+  </insert>
+
+</mapper>
+
+

@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="OrderDao">
+	<sql id="whereOrder">
+		<if test="INTERFACE_ID != null and INTERFACE_ID != '' ">
+			AND VO.INTERFACE_ID =  #{INTERFACE_ID}
+		</if>
+		<if test="VO_STATE != null and VO_STATE != '' ">
+			AND VO.VO_STATE =  #{VO_STATE}
+		</if>
+		<if test="ORDER_TYPE != null and ORDER_TYPE != '' ">
+			AND VO.ORDER_TYPE =  #{ORDER_TYPE}
+		</if>
+		<if test="SDATE != null and SDATE != '' ">
+			AND DATE_FORMAT(VO.ISRT_DTM, '%Y-%m-%d') BETWEEN #{SDATE} AND #{EDATE} 
+		</if>
+		<if test="ORDER_NO != null and ORDER_NO != '' ">
+			AND VO.ORDER_NO LIKE CONCAT('%', #{ORDER_NO}, '%')  
+		</if>
+	</sql>
+	
+	<select id="selectOrderListCnt"  resultType="int"  parameterType="hashmap">
+		SELECT IFNULL(COUNT(*), 0) AS CNT
+		 FROM (
+ 				SELECT
+						ST.*
+					FROM (
+							 SELECT
+									@RNUM := @RNUM + 1 AS RNUM,
+									VO.VO_WMS_NO,
+									VO.VO_STATE,
+									VO.INTERFACE_ID,
+									VO.ORDER_TYPE,
+									VO.ORDER_NO,
+									VO.ALF_PACK_NO,
+									DATE_FORMAT( VO.START_DATE, '%Y-%m-%d %H:%i:%s') AS START_DATE,
+									DATE_FORMAT( VO.END_DATE, '%Y-%m-%d %H:%i:%s') AS END_DATE,
+									VO.REMOVE_YN,
+									VO.SEND_YN,
+									VO.ISRT_ID,
+									DATE_FORMAT( VO.ISRT_DTM, '%Y-%m-%d %H:%i:%s') AS ISRT_DTM,
+									VO.UPDT_ID,
+									DATE_FORMAT( VO.UPDT_DTM, '%Y-%m-%d %H:%i:%s') AS UPDT_DTM    
+							   FROM VR_ORDER_WMS VO 
+					LEFT OUTER JOIN VR_WMVFILE VW ON VO.VO_WMS_NO = VW.VW_ORDERNO
+					LEFT OUTER JOIN VR_ORGFILE VF ON VO.VO_WMS_NO = VF.VO_WMS_NO, (SELECT @RNUM := 0) R 
+							  WHERE 1=1
+							    AND TRIM(VF.VO_NO) <![CDATA[<>]]> ''
+		    					AND TRIM(VW.VW_NO) <![CDATA[<>]]> ''
+							 <include refid="whereOrder" />
+						 ) ST
+				  WHERE 1=1	
+ 			 ) TOT
+	  WHERE 1=1  
+	</select>
+	
+	<select id="selectOrderList" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		SELECT 
+						IFNULL(ST.RNUM, 0) AS RNUM,
+				        IFNULL(ST.VO_WMS_NO, '') AS VO_WMS_NO,
+				        IFNULL(ST.VO_STATE, '') AS VO_STATE,
+				        IFNULL(ST.INTERFACE_ID, '') AS INTERFACE_ID,
+				        IFNULL(ST.ORDER_TYPE, '') AS ORDER_TYPE,
+				        IFNULL(ST.ORDER_NO, '') AS ORDER_NO,
+				        IFNULL(ST.ALF_PACK_NO, '') AS ALF_PACK_NO,
+				        IFNULL(ST.START_DATE, '') AS START_DATE,
+				        IFNULL(ST.END_DATE, '') AS END_DATE,
+				        IFNULL(ST.REMOVE_YN, '') AS REMOVE_YN,
+				        IFNULL(ST.SEND_YN, '') AS SEND_YN,
+				        IFNULL(ST.VO_NO, '') AS VO_NO,
+				        IFNULL(ST.VW_NO, '') AS VW_NO,
+				        IFNULL(ST.ISRT_ID, '') AS ISRT_ID,
+				        IFNULL(ST.ISRT_DTM, '') AS ISRT_DTM,
+				        IFNULL(ST.UPDT_ID, '') AS UPDT_ID,
+				        IFNULL(ST.UPDT_DTM, '') AS UPDT_DTM
+		  FROM ( 			
+							 SELECT
+									@RNUM := @RNUM + 1 AS RNUM,
+									VO.VO_WMS_NO,
+									VO.VO_STATE,
+									VO.INTERFACE_ID,
+									VO.ORDER_TYPE,
+									VO.ORDER_NO,
+									VO.ALF_PACK_NO,
+									DATE_FORMAT( VO.START_DATE, '%Y-%m-%d %H:%i:%s') AS START_DATE,
+									DATE_FORMAT( VO.END_DATE, '%Y-%m-%d %H:%i:%s') AS END_DATE,
+									VO.REMOVE_YN,
+									VO.SEND_YN,
+									VO.ISRT_ID,
+									DATE_FORMAT( VO.ISRT_DTM, '%Y-%m-%d %H:%i:%s') AS ISRT_DTM,
+									VO.UPDT_ID,
+									DATE_FORMAT( VO.UPDT_DTM, '%Y-%m-%d %H:%i:%s') AS UPDT_DTM,
+									VF.VO_NO,
+									VW.VW_NO    
+							   FROM VR_ORDER_WMS VO 
+					LEFT OUTER JOIN VR_WMVFILE VW ON VO.VO_WMS_NO = VW.VW_ORDERNO
+					LEFT OUTER JOIN VR_ORGFILE VF ON VO.VO_WMS_NO = VF.VO_WMS_NO, (SELECT @RNUM := 0) R
+							  WHERE 1=1
+							    AND TRIM(VF.VO_NO) <![CDATA[<>]]> ''
+		    					AND TRIM(VW.VW_NO) <![CDATA[<>]]> ''
+							 <include refid="whereOrder" />
+							
+			) ST
+	  WHERE 1=1
+	  ORDER BY ST.VO_WMS_NO DESC
+	  LIMIT ${startPage}, ${endPage} 
+  </select>
+  
+  
+  <select id="selectOrderTopCnt" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+  	SELECT
+			IFNULL(SUM(B.N01), 0) AS SNO,
+			IFNULL(SUM(B.N02), 0) AS RNO,
+			IFNULL(SUM(B.N03), 0) AS CNO,
+			IFNULL(SUM(B.CNT), 0) AS TOTAL
+	  FROM (
+	  			SELECT
+						A.VO_STATE,
+						CASE WHEN A.VO_STATE = 'S' THEN A.CNT ELSE '0' END AS N01,
+						CASE WHEN A.VO_STATE = 'R' THEN A.CNT ELSE '0' END AS N02,
+						CASE WHEN A.VO_STATE = 'C' THEN A.CNT ELSE '0' END AS N03,
+						A.CNT
+				 FROM (
+						SELECT 
+							   VO_STATE,
+							   COUNT(VO_STATE) AS CNT	
+						  FROM VR_ORDER_WMS VO 
+			   LEFT OUTER JOIN VR_WMVFILE VW ON VO.VO_WMS_NO = VW.VW_ORDERNO
+			   LEFT OUTER JOIN VR_ORGFILE VF ON VO.VO_WMS_NO = VF.VO_WMS_NO 
+						 WHERE 1=1
+						   AND TRIM(VF.VO_NO) <![CDATA[<>]]> ''
+		    			   AND TRIM(VW.VW_NO) <![CDATA[<>]]> ''
+							<include refid="whereOrder" />
+					  GROUP BY VO.VO_STATE		
+					  ) A
+			    WHERE 1=1 
+		   ) B
+     WHERE 1=1
+  </select>
+  
+  <update id="orderUpdate" parameterType="HashMap">
+	  	UPDATE VR_ORDER_WMS
+		   SET
+				<if test="FILE_YN != null and FILE_YN != '' ">FILE_YN = #{FILE_YN},</if>    	
+				UPDT_ID = #{ISRT_ID},
+				UPDT_DTM = NOW()
+		WHERE 1=1
+	  		<if test="VO_WMS_NO != null and VO_WMS_NO != '' ">
+				  AND VO_WMS_NO =  #{VO_WMS_NO}
+			</if>
+  </update>
+  
+</mapper>
